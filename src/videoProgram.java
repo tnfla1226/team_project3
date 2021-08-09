@@ -43,7 +43,7 @@ public class videoProgram {
 
             int idIdx = checkId(inputId);
             if(idIdx == -1) {
-                System.out.println("없는 아이디 입니다.");
+                System.out.println("존재하지 않는 아이디 입니다.");
             } else {
                 System.out.print("PW: ");
                 String inputPw = sc.nextLine();
@@ -59,7 +59,6 @@ public class videoProgram {
 
     }
 
-
     // 회원가입 기능
     public static void join() {
         System.out.println("=============================");
@@ -71,7 +70,7 @@ public class videoProgram {
 
         // 회원정보 비교
         if(idIdx != -1) {
-            System.out.println("있는 아이디 입니다.");
+            System.out.println("존재하는 아이디 입니다.");
         } else { // 데이터 추가
             System.out.print("PW: ");
             String inputPw = sc.nextLine();
@@ -98,9 +97,6 @@ public class videoProgram {
             rentalVideo = rentalVideoTemp;
             rentalDate = rentalDateTemp;
             returnDate = returnDateTemp;
-
-            idTemp = null;
-            pwTemp = null;
 
             System.out.println(Arrays.toString(id));
             System.out.println(Arrays.toString(password));
@@ -133,10 +129,10 @@ public class videoProgram {
             System.out.println("========================================================");
             System.out.printf("[%s]님이 대여한 비디오 목록\n", id[idx]);
             System.out.println("========================================================");
-            System.out.println("번호 | 비디어 이름 | 대여 일자 | 반납일자 ");
+            System.out.println("번호 |  비디오 이름  |  대여 일자  |  반납일자  ");
             System.out.println("========================================================");
             for (int i = 0; i < rentalVideo[idx].length; i++) {
-                System.out.printf("%-5d| %-12s| %-12s| %-12s\n", i+1, rentalVideo[idx][i], rentalDate[idx][i], returnDate[idx][i]);
+                System.out.printf("%-4d| %-10s| %-10s| %-10s\n", i+1, rentalVideo[idx][i], rentalDate[idx][i], returnDate[idx][i]);
             }
         }
     }
@@ -172,26 +168,37 @@ public class videoProgram {
             break;
         }
 
-        if (currentId.equals("admin")) {
-            //관리자 화면
+        System.out.println();
+
+        if (currentId.equals("admin")) {  //관리자 화면
             System.out.println("=============================");
             System.out.println("+++++관리자 권한++++++");
             System.out.println("=============================");
             System.out.println("1. 고객관리");
             System.out.println("2. 재고관리");
-            System.out.print("> ");
-            menuNum = sc.nextInt();
 
-            switch (menuNum) {
-                case 1:
-                    customerMgm();
-                case 2:
+            while(true){
+                System.out.print("> ");
+                menuNum = sc.nextInt();
+
+                switch (menuNum) {
+                    case 1:
+                        customerMgm();
+                        break;
+                    case 2:
+                        break;
+                    default:
+                        System.out.println("잘못된 메뉴 선택입니다.");
+                        continue;
+                }
+                break;
             }
-        } else {
-            System.out.println("이용자 페이지 입니다.");
+        } else { // 이용자 화면
+            System.out.println("=============================");
+            System.out.println("+++++비디오 대여++++++");
+            System.out.println("=============================");
+            System.out.println("1. 비디오 내역");
+            System.out.println("2. 대여 목록");
         }
-
-
     }
-
 }

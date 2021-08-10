@@ -10,7 +10,7 @@ public class videoProgram {
     // 비디오 정보
     static String[] video = {"겨울왕국", "어벤져스", "분노의 질주", "싱크홀", "모가디슈", "프리 가이", "보스베이비",
             "블랙위도우", "더 수어사이드스퀘드", "원티드 킬러", "마이 네버 리스트", "이도공간", "올드", "켈리 갱"};
-    static int[] videoNum = {3, 2, 3, 3, 4, 3, 2, 1, 3, 5, 3, 2, 2, 5};
+    static int[] videoNum = {0, 2, 3, 3, 4, 3, 2, 1, 3, 5, 3, 2, 2, 5};
 
     // 유저 정보
     static String[] id = {"admin", "abcd1234"};
@@ -19,10 +19,11 @@ public class videoProgram {
     static String[][] rentalDate = {{"admin"}, {"210708", "210809"}};
     static String[][] returnDate = {{"admin"}, {"210815", "210820"}};
 
-    // 현재 로그인 유저
+    // 현재 로그인 상태
     static boolean isLogined = false;
     static boolean isQuit = false;
     static String currentId;
+    static boolean isMng = false;
 
     // 화면 초기화
     public static void clearScreen() {
@@ -46,9 +47,9 @@ public class videoProgram {
         System.out.println("=============================");
         System.out.println("++++++++++++로그인++++++++++++");
         System.out.println("=============================");
-        System.out.println("* ID 입력 창에 숫자 0을 입력시 첫화면으로 이동");
+        System.out.println("- ID 입력 창에 숫자 0을 입력시 첫화면으로 이동");
         while (true) {
-            System.out.print("ID: ");
+            System.out.print("- ID: ");
             String inputId = sc.nextLine();
 
             if(inputId.equals("0")) {
@@ -57,13 +58,14 @@ public class videoProgram {
 
             int idIdx = checkId(inputId);
             if(idIdx == -1) {
-                System.out.println("존재하지 않는 아이디 입니다.");
+                System.out.println("- 존재하지 않는 아이디 입니다.");
             } else {
-                System.out.print("PW: ");
+                System.out.print("- PW: ");
                 String inputPw = sc.nextLine();
                 if(!inputPw.equals(password[idIdx])) {
-                    System.out.println("비밀번호가 일치하지 않습니다.");
+                    System.out.println("- 비밀번호가 일치하지 않습니다.");
                 } else {
+                    if(inputId.equals("admin")) isMng = true;
                     currentId = inputId;
                     isLogined = true;
                     System.out.println("=============================");
@@ -80,8 +82,8 @@ public class videoProgram {
         System.out.println("=============================");
         System.out.println("+++++++++++회원가입+++++++++++");
         System.out.println("=============================");
-        System.out.println("* 숫자 0을 입력시 첫화면으로 이동");
-        System.out.print("ID: ");
+        System.out.println("- ID 입력창에 숫자 0을 입력시 첫화면으로 이동");
+        System.out.print("- ID: ");
         String inputId = sc.nextLine();
         if(inputId.equals("0")) {
             return;
@@ -91,10 +93,15 @@ public class videoProgram {
 
         // 회원정보 비교
         if(idIdx != -1) {
-            System.out.println("존재하는 아이디 입니다.");
+            System.out.println("- 존재하는 아이디 입니다.");
         } else { // 데이터 추가
-            System.out.print("PW: ");
+            System.out.print("- PW: ");
             String inputPw = sc.nextLine();
+
+            System.out.println("- 계정을 생성하시겠습니까?");
+            System.out.println("- 확인 시 엔터, 숫자 0을 입력하면 취소합니다.");
+            System.out.print("> ");
+            if(sc.nextLine().equals("0")) return;
 
             String[] idTemp = new String[id.length + 1];
             String[] pwTemp = new String[password.length + 1];
@@ -112,39 +119,100 @@ public class videoProgram {
 
             idTemp[idTemp.length - 1] = inputId;
             pwTemp[pwTemp.length - 1] = inputPw;
+            rentalVideoTemp[rentalVideoTemp.length - 1] = new String[0];
+            rentalDateTemp[rentalDateTemp.length - 1] = new String[0];
+            returnDateTemp[returnDateTemp.length - 1] = new String[0];
 
             id = idTemp;
             password = pwTemp;
             rentalVideo = rentalVideoTemp;
             rentalDate = rentalDateTemp;
             returnDate = returnDateTemp;
-
-            System.out.println(Arrays.toString(id));
-            System.out.println(Arrays.toString(password));
-            System.out.println(Arrays.deepToString(rentalVideo));
         }
         System.out.println("=============================");
     }
 
     // 이용자 상세 정보 표시
-    static void showUserInfo(int idx) {
+    public static void showUserRentalList(int idx) {
         while (true) {
             clearScreen();
             System.out.println("========================================================");
-            System.out.printf("[%s]님이 대여한 비디오 목록\n", id[idx]);
+            System.out.printf("- [%s]님이 대여한 비디오 목록\n", id[idx]);
             System.out.println("========================================================");
             System.out.println("번호 |  비디오 이름  |  대여 일자  |  반납일자  ");
             System.out.println("========================================================");
-            for (int i = 0; i < rentalVideo[idx].length; i++) {
-                System.out.printf("%-4d| %-10s| %-10s| %-10s\n", i+1, rentalVideo[idx][i], rentalDate[idx][i], returnDate[idx][i]);
+            if(rentalVideo[idx].length == 0) {
+                System.out.println("- 대여한 내역이 없습니다.");
+            } else {
+                for (int i = 0; i < rentalVideo[idx].length; i++) {
+                    System.out.printf("%-4d| %-10s| %-10s| %-10s\n", i+1, rentalVideo[idx][i], rentalDate[idx][i], returnDate[idx][i]);
+                }
             }
-            System.out.println("숫자 0을 입력시 뒤로갑니다.");
-            System.out.print("> ");
-            if(sc.nextLine().equals("0")) return;
+            if(!isMng) {
+                System.out.println("- 반납할 비디오를 입력해주세요");
+                System.out.println("- 숫자 0을 입력시 뒤로갑니다.");
+                while(true) {
+                    System.out.print("> ");
+                    String returnVideoName = sc.nextLine();
+                    if(returnVideoName.equals("0")) return;
+
+                    int returnVideoidx = -1;
+                    for(int i = 0; i < rentalVideo[idx].length; i++) {
+                        if(returnVideoName.equals(rentalVideo[idx][i])) {
+                            returnVideoidx = i;
+                            break;
+                        }
+                    }
+
+                    if(returnVideoidx == -1) {
+                        System.out.println("- 대여한 기록이 없는 비디오입니다.");
+                    } else {
+                        System.out.printf("- %s(을)를 반납하시겠습니까?\n", returnVideoName);
+                        System.out.println("- 숫자 0을 입력시 취소합니다.");
+                        System.out.print("> ");
+                        if(sc.nextLine().equals("0")) break;
+
+                        returnVideo(idx, returnVideoidx);
+                        break;
+                    }
+                }
+            } else {
+                System.out.println("- 숫자 0을 입력시 뒤로갑니다.");
+                System.out.print("> ");
+                if(sc.nextLine().equals("0")) return;
+            }
         }
     }
+
+    // 비디오 반납 기능
+    public static void returnVideo(int userIdx, int returnVideoIdx) {
+        // 비디오 재고 갯수 증가
+        videoNum[checkVideoIdx(rentalVideo[userIdx][returnVideoIdx])]++;
+
+        // 비디오 반납 - 대여 비디오, 기한 제거
+        String[] rentalVideoTemp = new String[rentalVideo[userIdx].length - 1];
+        String[] rentalDateTemp = new String[rentalDate[userIdx].length - 1];
+        String[] returnDateTemp = new String[returnDate[userIdx].length - 1];
+
+        for (int i = returnVideoIdx; i < rentalVideo[userIdx].length - 1; i++) {
+            rentalVideo[userIdx][i] = rentalVideo[userIdx][i + 1];
+            rentalDate[userIdx][i] = rentalDate[userIdx][i + 1];
+            returnDate[userIdx][i] = returnDate[userIdx][i + 1];
+        }
+
+        for (int i = 0; i < rentalVideoTemp.length; i++) {
+            rentalVideoTemp[i] = rentalVideo[userIdx][i];
+            rentalDateTemp[i] = rentalDate[userIdx][i];
+            returnDateTemp[i] = returnDate[userIdx][i];
+        }
+
+        rentalVideo[userIdx] = rentalVideoTemp;
+        rentalDate[userIdx] = rentalDateTemp;
+        returnDate[userIdx] = returnDateTemp;
+    }
+
     // 고객관리 화면
-    static void customerMgm () {
+    public static void customerMgm () {
         while(true) {
             clearScreen();
             System.out.println("=============================");
@@ -155,8 +223,8 @@ public class videoProgram {
                 System.out.printf("%d| %s\n", i+1, id[i]);
             }
             System.out.println("=============================");
-            System.out.println("* 고객 ID를 입력하세요.");
-            System.out.println("* 숫자 0을 입력시 메인 메뉴로 이동합니다.");
+            System.out.println("- 고객 ID를 입력하세요.");
+            System.out.println("- 숫자 0을 입력시 메인 메뉴로 이동합니다.");
             System.out.println("=============================");
 
             System.out.print("> ");
@@ -165,9 +233,9 @@ public class videoProgram {
             int idx = checkId(inputId);
 
             if (idx == -1) {
-                System.out.println("해당 id가 존재하지 않습니다.");
+                System.out.println("- 해당 id가 존재하지 않습니다.");
             } else {
-                showUserInfo(idx);
+                showUserRentalList(idx);
             }
         }
     }
@@ -187,11 +255,13 @@ public class videoProgram {
 
         // 목록 리스트 표시
         clearScreen();
-        System.out.println("================");
-        System.out.println("비디오 목록");
-        System.out.println("================");
+        System.out.println("=============================");
+        System.out.println("- 비디오 목록");
+        System.out.println("=============================");
+        System.out.println("번호 | 비디오 이름  | 잔여 갯수");
+        System.out.println("=============================");
         for (int i = startNum; i < endNum; i++) {
-            System.out.print((i + 1) + " " + video[i] + " " + videoNum[i] + "권 남음" + "\n");
+            System.out.printf("%d  | %-10s - %5d개 |\n", i + 1, video[i], videoNum[i]);
         }
     }
 
@@ -201,16 +271,20 @@ public class videoProgram {
         int currentPage = 1;
 
         while (true) {
-
             showvideoList(currentPage);
 
-            System.out.println("================");
-            System.out.println("1. 다음페이지");
-            System.out.println("2. 이전페이지");
-            System.out.println("3. 비디오 추가");
-            System.out.println("4. 비디오 제거");
-            System.out.println("5. 메인 화면으로 이동");
-            System.out.println("================");
+            System.out.println("=============================");
+            System.out.println("0. 메인 화면으로 이동");
+            System.out.println("1. 이전페이지");
+            System.out.println("2. 다음페이지");
+            if(isMng) {
+                System.out.println("3. 비디오 추가");
+                System.out.println("4. 비디오 제거");
+
+            } else {
+                System.out.println("3. 비디오 대여");
+            }
+            System.out.println("=============================");
 
             System.out.print("> ");
             int menuNum = sc.nextInt();
@@ -218,48 +292,106 @@ public class videoProgram {
 
             // 선택된 메뉴에 따른 행위
             switch (menuNum) {
-                case 1: // 다음페이지
-                    if(currentPage == (int) Math.ceil(video.length / 5.0)) {
-                        break;
-                    }
-                    currentPage++;
-                    break;
-                case 2: // 이전페이지
+                case 0:
+                    return;
+                case 1: // 이전페이지
                     if(currentPage == 1) {
                         break;
                     }
                     currentPage--;
                     break;
+                case 2: // 다음페이지
+                    if(currentPage == (int) Math.ceil(video.length / 5.0)) {
+                        break;
+                    }
+                    currentPage++;
+                    break;
                 case 3: // 비디오 추가
-                    addVideo();
+                    if(isMng) { // 메니저일시 비디오 추가
+                        addVideo();
+                    } else { // 일반 이용자일시 비디오 대여
+                        rentalVideo(); 
+                    }
                     break;
                 case 4: // 비디오 삭제
-                    removeVideo();
-                    break;
-                case 5:
-                    return;
+                    if (isMng) {
+                        removeVideo();
+                        break;
+                    }
                 default:
-                    System.out.println("잘못된 메뉴 선택입니다.");
+                    System.out.println("- 잘못된 메뉴 선택입니다.");
             }
 
         }
     }
 
-    //비디오 추가 기능
-    static void addVideo() {
+    // 비디오 대여 기능
+    public static void rentalVideo() {
+        System.out.println("- 대여할 비디오 이름을 입력하세요. (1개씩 대여할 수 있습니다)");
+        while(true) {
+            System.out.print("> ");
+            String newRentalVideoName = sc.nextLine();
 
-        System.out.println("추가할 비디오 이름을 입력하세요.");
+            int videoIdx = checkVideoIdx(newRentalVideoName);
+            if (videoIdx == -1) {
+                System.out.println("- 없는 비디오입니다. 다시 한번 입력해주세요.");
+            } else {
+                // 비디오 갯수 확인
+                if(videoNum[videoIdx] <= 0) {
+                    System.out.println("- 재고가 없어 대여가 불가능 합니다.");
+                    continue;
+                }
+
+                System.out.printf("- %s(을)를 대여하시겠습니까?\n", newRentalVideoName);
+                System.out.println("- 확인 시 엔터, 숫자 0을 입력하면 취소합니다.");
+                System.out.print("> ");
+                if(sc.nextLine().equals("0")) return;
+                
+                int userIdx = checkId(currentId);
+
+                // 대여 내역 추가 - 대여 비디오, 기한 추가
+                String[] rentalVideoTemp = new String[rentalVideo[userIdx].length + 1];
+                String[] rentalDateTemp = new String[rentalDate[userIdx].length + 1];
+                String[] returnDateTemp = new String[returnDate[userIdx].length + 1];
+
+                for (int i = 0; i < rentalVideo[userIdx].length; i++) {
+                    rentalVideoTemp[i] = rentalVideo[userIdx][i];
+                    rentalDateTemp[i] = rentalDate[userIdx][i];
+                    returnDateTemp[i] = returnDate[userIdx][i];
+                }
+
+                rentalVideoTemp[rentalVideoTemp.length - 1] = newRentalVideoName;
+                rentalDateTemp[rentalDateTemp.length - 1] = "210810";
+                returnDateTemp[returnDateTemp.length - 1] = "210822";
+
+                rentalVideo[userIdx] = rentalVideoTemp;
+                rentalDate[userIdx] = rentalDateTemp;
+                returnDate[userIdx] = returnDateTemp;
+
+                // 비디오 갯수 감소
+                videoNum[videoIdx]--;
+                return;
+            }
+        }
+
+
+    }
+
+    //비디오 추가 기능
+    public static void addVideo() {
+
+        System.out.println("- 추가할 비디오 이름을 입력하세요.");
         System.out.print("> ");
         String newVideo = sc.nextLine();
 
-        System.out.println("추가할 비디오의 개수를 입력하세요.");
+        System.out.println("- 추가할 비디오의 개수를 입력하세요.");
         System.out.print("> ");
         int newVideoNum = sc.nextInt();
         sc.nextLine();
 
         // 추가 확인
-        System.out.printf("%s(%d개)를 추가하시겠습니까?\n", newVideo, newVideoNum);
-        System.out.println("숫자 0을 입력하면 취소합니다.");
+        System.out.printf("- %s(%d개)를 추가하시겠습니까?\n", newVideo, newVideoNum);
+        System.out.println("- 확인 시 엔터, 숫자 0을 입력하면 취소합니다.");
         System.out.print("> ");
         if(sc.nextLine().equals("0")) return;
 
@@ -279,7 +411,7 @@ public class videoProgram {
     }
 
     // 비디오 탐색 기능, 인덱스 반환, 없을시 -1 반환
-    static public int checkVideoIdx(String searchVideoName) {
+    public static int checkVideoIdx(String searchVideoName) {
         int idx = -1;
         for (int i = 0; i < video.length; i++) {
             if (searchVideoName.equals(video[i])) {
@@ -293,7 +425,7 @@ public class videoProgram {
     // 비디오 삭제 기능
     public static void removeVideo() {
         while(true) {
-            System.out.println("- 삭제할 비디오를 입력하세요! ");
+            System.out.println("- 제거할 비디오를 입력하세요! ");
             System.out.print("> ");
             String removeVideoName = sc.nextLine();
             
@@ -302,10 +434,10 @@ public class videoProgram {
 
             // 비디오 유무 판단
             if (idx == -1) {
-                System.out.println("없는 비디오 입니다.");
+                System.out.println("- 없는 비디오 입니다.");
             } else {
-                System.out.println(video[idx] + "을(를) 제거하시겠습니까?");
-                System.out.println("숫자 0을 입력하면 취소합니다.");
+                System.out.println("- " + video[idx] + "을(를) 제거하시겠습니까?");
+                System.out.println("- 확인 시 엔터, 숫자 0을 입력하면 취소합니다.");
                 System.out.print("> ");
                 if(sc.nextLine().equals("0")) return;
 
@@ -329,7 +461,7 @@ public class videoProgram {
     }
     
     // 로그인 화면(첫 화면)
-    static public void loginMenu() {
+    public static void loginMenu() {
         // 메뉴 버튼
         int menuNum;
 
@@ -358,43 +490,46 @@ public class videoProgram {
                     systemQuit();
                     return;
                 default:
-                    System.out.println("잘못된 메뉴 선택입니다.");
+                    System.out.println("- 잘못된 메뉴 선택입니다.");
             }
         }
     }
 
     // 시스템 종료 기능
-    static public void systemQuit() {
-        System.out.println("프로그램을 종료하시겠습니까?");
-        System.out.println("숫자 0을 입력하면 취소합니다.");
+    public static void systemQuit() {
+        System.out.println();
+        System.out.println("- 프로그램을 종료하시겠습니까?");
+        System.out.println("- 확인 시 엔터, 숫자 0을 입력하면 취소합니다.");
         System.out.print("> ");
         if(sc.nextLine().equals("0")) return;
         isQuit = true;
     }
 
     // 로그아웃 기능
-    static  public void logout() {
-        System.out.println("로그아웃하시겠습니까?");
-        System.out.println("숫자 0을 입력하면 취소합니다.");
+    public static void logout() {
+        System.out.println();
+        System.out.println("- 로그아웃하시겠습니까?");
+        System.out.println("- 확인 시 엔터, 숫자 0을 입력하면 취소합니다.");
         System.out.print("> ");
         if(sc.nextLine().equals("0")) return;
+        isMng = false;
         isLogined = false;
         currentId = "";
     }
 
-    static public void mainMenu() {
+    public static void mainMenu() {
         int menuNum = 0;
-        if (currentId.equals("admin")) {  //관리자 화면
-            clearScreen();
-            System.out.println("=============================");
-            System.out.println("+++++관리자 권한++++++");
-            System.out.println("=============================");
-            System.out.println("1. 고객관리");
-            System.out.println("2. 재고관리");
-            System.out.println("3. 로그아웃");
-            System.out.println("4. 프로그램 종료");
-
+        if (isMng) {  //관리자 화면
             while (true) {
+                clearScreen();
+                System.out.println("=============================");
+                System.out.println("+++++관리자 권한++++++");
+                System.out.println("=============================");
+                System.out.println("1. 고객관리");
+                System.out.println("2. 재고관리");
+                System.out.println("3. 로그아웃");
+                System.out.println("4. 프로그램 종료");
+                System.out.println("=============================");
                 System.out.print("> ");
                 menuNum = sc.nextInt();
                 sc.nextLine();
@@ -402,10 +537,10 @@ public class videoProgram {
                 switch (menuNum) {
                     case 1:
                         customerMgm();
-                        return;
+                        break;
                     case 2:
                         VideoList();
-                        return;
+                        break;
                     case 3:
                         logout();
                         return;
@@ -413,30 +548,31 @@ public class videoProgram {
                         systemQuit();
                         return;
                     default:
-                        System.out.println("잘못된 메뉴 선택입니다.");
+                        System.out.println("- 잘못된 메뉴 선택입니다.");
                 }
             }
         } else { // 이용자 화면
-            System.out.println("=============================");
-            System.out.println("+++++비디오 대여++++++");
-            System.out.println("=============================");
-            System.out.println("1. 비디오 목록");
-            System.out.println("2. 대여 내역");
-            System.out.println("3. 로그아웃");
-            System.out.println("4. 프로그램 종료");
-
             while (true) {
+                clearScreen();
+                System.out.println("=============================");
+                System.out.println("+++++비디오 대여++++++");
+                System.out.println("=============================");
+                System.out.println("1. 비디오 목록");
+                System.out.println("2. 대여 내역");
+                System.out.println("3. 로그아웃");
+                System.out.println("4. 프로그램 종료");
+                System.out.println("=============================");
                 System.out.print("> ");
                 menuNum = sc.nextInt();
                 sc.nextLine();
 
                 switch (menuNum) {
                     case 1:
-                        customerMgm();
-                        return;
-                    case 2:
                         VideoList();
-                        return;
+                        break;
+                    case 2:
+                        showUserRentalList(checkId(currentId));
+                        break;
                     case 3:
                         logout();
                         return;
@@ -444,17 +580,16 @@ public class videoProgram {
                         systemQuit();
                         return;
                     default:
-                        System.out.println("잘못된 메뉴 선택입니다.");
+                        System.out.println("- 잘못된 메뉴 선택입니다.");
                 }
             }
         }
     }
 
-
     // 프로그램 메인 실행부
     public static void main(String[] args) {
 
-        while(!isQuit) {
+        while(!isQuit) { // 프로그램이 종료 될 때까지 실행
             if(!isLogined) { // 로그인되지 않았다면
                 loginMenu();
             } else { // 로그인 상태라면
@@ -463,4 +598,3 @@ public class videoProgram {
         }
     }
 }
-

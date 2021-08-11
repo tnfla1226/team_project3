@@ -1,9 +1,12 @@
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.Scanner;
 
 import static java.lang.String.*;
 
-public class videoProgram {
+public class VideoProgram {
 
     static Scanner sc = new Scanner(System.in);
 
@@ -16,8 +19,8 @@ public class videoProgram {
     static String[] id = {"admin", "abcd1234"};
     static String[] password = {"admin", "abcd1234"};
     static String[][] rentalVideo = {{"admin"}, {"어벤져스", "기생충"}};
-    static String[][] rentalDate = {{"admin"}, {"210708", "210809"}};
-    static String[][] returnDate = {{"admin"}, {"210815", "210820"}};
+    static String[][] rentalDate = {{"00000000"}, {"20210708", "20210809"}};
+    static String[][] returnDate = {{"00000000"}, {"20210815", "20210820"}};
 
     // 현재 로그인 상태
     static boolean isLogined = false;
@@ -132,49 +135,94 @@ public class videoProgram {
         System.out.println("=============================");
     }
 
+    //날짜 표시 함수(포멧팅)
+    static public String stringTodate(String dateStr) {
+
+        String strNewDtFormat = "";
+        try {
+            SimpleDateFormat dtFormat = new SimpleDateFormat("yyyyMMdd");
+            SimpleDateFormat newDtFormat = new SimpleDateFormat("yyyy-MM-dd");
+            // String 타입을 Date 타입으로 변환
+            Date formatDate = dtFormat.parse(dateStr);
+            // Date타입의 변수를 새롭게 지정한 포맷으로 변환
+            strNewDtFormat = newDtFormat.format(formatDate);
+        }
+        catch (ParseException e){
+            e.printStackTrace();
+        }
+        return strNewDtFormat;
+    }
+
+    // 날짜 증가 기능
+    static public String addDate(String date, int addDateNum) {
+        String newDateStrBefore = Integer.toString(Integer.parseInt(date)+addDateNum);
+        String newDateStrAfter = "";
+        try {
+            SimpleDateFormat dtFormat = new SimpleDateFormat("yyyyMMdd");
+            // String 타입을 Date 타입으로 변환
+            Date formatDate = dtFormat.parse(newDateStrBefore);
+            // Date타입의 변수를 다시 String타입으로 변환
+            newDateStrAfter = dtFormat.format(formatDate);
+
+        }
+        catch (ParseException e){
+            e.printStackTrace();
+        }
+        return newDateStrAfter;
+    }
+
+    // 현재 날짜 String반환
+    static public String getNowDate() {
+        Date nowDate = new Date();
+
+        SimpleDateFormat dtFormat = new SimpleDateFormat("yyyyMMdd");
+        // Date타입의 변수를 다시 String타입으로 변환
+
+        return dtFormat.format(nowDate);
+    }
+
     // 이용자 상세 정보 표시
-    public static void showUserRentalList(int idx) {
+    public static void showUserRentalList(int userIdx) {
         while (true) {
             clearScreen();
             System.out.println("========================================================");
-            System.out.printf("- [%s]님이 대여한 비디오 목록\n", id[idx]);
+            System.out.printf("- [%s]님이 대여한 비디오 목록\n", id[userIdx]);
             System.out.println("========================================================");
             System.out.println("번호 |  비디오 이름  |  대여 일자  |  반납일자  ");
             System.out.println("========================================================");
-            if(rentalVideo[idx].length == 0) {
+            if(rentalVideo[userIdx].length == 0) {
                 System.out.println("- 대여한 내역이 없습니다.");
+                System.out.println("========================================================");
             } else {
-                for (int i = 0; i < rentalVideo[idx].length; i++) {
-                    System.out.printf("%-4d| %-10s| %-10s| %-10s\n", i+1, rentalVideo[idx][i], rentalDate[idx][i], returnDate[idx][i]);
+                for (int i = 0; i < rentalVideo[userIdx].length; i++) {
+                    System.out.printf("%-4d| %-10s| %-10s| %-10s\n", i+1, rentalVideo[userIdx][i], stringTodate(rentalDate[userIdx][i]), stringTodate(returnDate[userIdx][i]));
                 }
+                System.out.println("========================================================");
             }
             if(!isMng) {
-                System.out.println("- 반납할 비디오를 입력해주세요");
-                System.out.println("- 숫자 0을 입력시 뒤로갑니다.");
+                System.out.println("0. 뒤로가기");
+                System.out.println("1. 대여기간 연장");
+                System.out.println("2. 반납");
+                System.out.println("========================================================");
                 while(true) {
                     System.out.print("> ");
-                    String returnVideoName = sc.nextLine();
-                    if(returnVideoName.equals("0")) return;
+                    int menuNum = sc.nextInt();
+                    sc.nextLine();
 
-                    int returnVideoidx = -1;
-                    for(int i = 0; i < rentalVideo[idx].length; i++) {
-                        if(returnVideoName.equals(rentalVideo[idx][i])) {
-                            returnVideoidx = i;
+                    switch (menuNum) {
+                        case 0:
+                            return;
+                        case 1:
+                            rentalDateAdd();
                             break;
-                        }
+                        case 2:
+                            returnVideo();
+                            break;
+                        default:
+                            System.out.println("- 잘못된 메뉴 선택입니다.");
+                            continue;
                     }
-
-                    if(returnVideoidx == -1) {
-                        System.out.println("- 대여한 기록이 없는 비디오입니다.");
-                    } else {
-                        System.out.printf("- %s(을)를 반납하시겠습니까?\n", returnVideoName);
-                        System.out.println("- 숫자 0을 입력시 취소합니다.");
-                        System.out.print("> ");
-                        if(sc.nextLine().equals("0")) break;
-
-                        returnVideo(idx, returnVideoidx);
-                        break;
-                    }
+                    break;
                 }
             } else {
                 System.out.println("- 숫자 0을 입력시 뒤로갑니다.");
@@ -184,31 +232,72 @@ public class videoProgram {
         }
     }
 
+    // 대여기간 연장
+    public static void rentalDateAdd() {
+        int userIdx = checkId(currentId);
+        while(true) {
+            System.out.println("- 대여기간 연장을 원하시는 비디오의 번호를 입력하세요");
+            System.out.print("> ");
+            int returnVideoIdx = sc.nextInt() - 1;
+            sc.nextLine();
+            if (returnVideoIdx >= rentalVideo[userIdx].length) {
+                System.out.println("- 잘못된 번호 입력입니다. 다시 입력해주세요.");
+            } else {
+                String returnVideoName = rentalVideo[userIdx][returnVideoIdx];
+                System.out.printf("- %s(을)를 14일 연장하시겠습니까?\n", returnVideoName);
+                System.out.println("- 확인 시 엔터, 숫자 0을 입력하면 취소합니다.");
+                System.out.print("> ");
+                if(sc.nextLine().equals("0")) break;
+
+                returnDate[userIdx][returnVideoIdx] = addDate(returnDate[userIdx][returnVideoIdx], 14);
+                break;
+            }
+        }
+    }
+
     // 비디오 반납 기능
-    public static void returnVideo(int userIdx, int returnVideoIdx) {
-        // 비디오 재고 갯수 증가
-        videoNum[checkVideoIdx(rentalVideo[userIdx][returnVideoIdx])]++;
+    public static void returnVideo() {
+        int userIdx = checkId(currentId);
+        while(true) {
+            System.out.println("- 반납을 원하시는 비디오의 번호를 입력하세요");
+            System.out.print("> ");
+            int returnVideoIdx = sc.nextInt() - 1;
+            sc.nextLine();
+            if(returnVideoIdx >= rentalVideo[userIdx].length) {
+                System.out.println("- 잘못된 번호 입력입니다. 다시 입력해주세요.");
+            } else {
+                String returnVideoName = rentalVideo[userIdx][returnVideoIdx];
+                System.out.printf("- %s(을)를 반납하시겠습니까?\n", returnVideoName);
+                System.out.println("- 확인 시 엔터, 숫자 0을 입력하면 취소합니다.");
+                System.out.print("> ");
+                if(sc.nextLine().equals("0")) break;
 
-        // 비디오 반납 - 대여 비디오, 기한 제거
-        String[] rentalVideoTemp = new String[rentalVideo[userIdx].length - 1];
-        String[] rentalDateTemp = new String[rentalDate[userIdx].length - 1];
-        String[] returnDateTemp = new String[returnDate[userIdx].length - 1];
+                // 비디오 반납 - 대여 비디오, 기한 제거
+                String[] rentalVideoTemp = new String[rentalVideo[userIdx].length - 1];
+                String[] rentalDateTemp = new String[rentalDate[userIdx].length - 1];
+                String[] returnDateTemp = new String[returnDate[userIdx].length - 1];
 
-        for (int i = returnVideoIdx; i < rentalVideo[userIdx].length - 1; i++) {
-            rentalVideo[userIdx][i] = rentalVideo[userIdx][i + 1];
-            rentalDate[userIdx][i] = rentalDate[userIdx][i + 1];
-            returnDate[userIdx][i] = returnDate[userIdx][i + 1];
+                for (int i = returnVideoIdx; i < rentalVideo[userIdx].length - 1; i++) {
+                    rentalVideo[userIdx][i] = rentalVideo[userIdx][i + 1];
+                    rentalDate[userIdx][i] = rentalDate[userIdx][i + 1];
+                    returnDate[userIdx][i] = returnDate[userIdx][i + 1];
+                }
+
+                for (int i = 0; i < rentalVideoTemp.length; i++) {
+                    rentalVideoTemp[i] = rentalVideo[userIdx][i];
+                    rentalDateTemp[i] = rentalDate[userIdx][i];
+                    returnDateTemp[i] = returnDate[userIdx][i];
+                }
+
+                rentalVideo[userIdx] = rentalVideoTemp;
+                rentalDate[userIdx] = rentalDateTemp;
+                returnDate[userIdx] = returnDateTemp;
+
+                // 비디오 재고 갯수 증가
+                videoNum[checkVideoIdx(returnVideoName)]++;
+                break;
+            }
         }
-
-        for (int i = 0; i < rentalVideoTemp.length; i++) {
-            rentalVideoTemp[i] = rentalVideo[userIdx][i];
-            rentalDateTemp[i] = rentalDate[userIdx][i];
-            returnDateTemp[i] = returnDate[userIdx][i];
-        }
-
-        rentalVideo[userIdx] = rentalVideoTemp;
-        rentalDate[userIdx] = rentalDateTemp;
-        returnDate[userIdx] = returnDateTemp;
     }
 
     // 고객관리 화면
@@ -361,8 +450,8 @@ public class videoProgram {
                 }
 
                 rentalVideoTemp[rentalVideoTemp.length - 1] = newRentalVideoName;
-                rentalDateTemp[rentalDateTemp.length - 1] = "210810";
-                returnDateTemp[returnDateTemp.length - 1] = "210822";
+                rentalDateTemp[rentalDateTemp.length - 1] = getNowDate();
+                returnDateTemp[returnDateTemp.length - 1] = addDate(getNowDate(), 14);
 
                 rentalVideo[userIdx] = rentalVideoTemp;
                 rentalDate[userIdx] = rentalDateTemp;
@@ -598,3 +687,4 @@ public class videoProgram {
         }
     }
 }
+

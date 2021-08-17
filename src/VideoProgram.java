@@ -30,7 +30,7 @@ public class VideoProgram {
 
     // 화면 초기화
     public static void clearScreen() {
-        for (int i = 0; i < 80; i++)
+        for (int i = 0; i < 4; i++)
             System.out.println("");
     }
     
